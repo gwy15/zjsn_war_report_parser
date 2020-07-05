@@ -3,8 +3,9 @@ extern crate log;
 
 use glob::glob;
 
-mod utils;
 mod model;
+mod utils;
+mod writer;
 
 fn init() {
     use env_logger::{init_from_env, Env};
@@ -14,6 +15,9 @@ fn init() {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     init();
+
+    // init writer
+    let mut writer = writer::Writer::new();
 
     // find files
     for entry in glob("challenge/*.json").expect("Failed to glob files") {
