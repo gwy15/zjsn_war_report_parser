@@ -13,11 +13,11 @@ pub fn parse_and_write(path: PathBuf) -> Result<(), Box<dyn std::error::Error>> 
     let reader = File::open(&path)?;
     let data: Value = serde_json::from_reader(reader)?;
 
-    let war = War::from(&data, file_name).unwrap_or_else(|| {
+    let _war = War::from(&data, file_name).unwrap_or_else(|| {
         log::error!("文件解析错误：{}", path.display());
         panic!("文件解析错误：{}", path.display())
     });
-    println!("{:#?}", war);
+    // println!("{:#?}", war);
 
     Ok(())
 }

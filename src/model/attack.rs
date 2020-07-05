@@ -9,7 +9,7 @@ pub struct Attack {
 }
 
 impl Attack {
-    fn from(vo: &Value) -> Option<Self> {
+    pub fn from(vo: &Value) -> Option<Self> {
         let from_index = vo.get("fromIndex")?.as_i64()? as i32;
         let target_index = vo.get("targetIndex")?.as_array()?[0].as_i64()? as i32;
 

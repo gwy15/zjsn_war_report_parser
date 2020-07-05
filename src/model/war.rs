@@ -1,6 +1,5 @@
 use super::attack::Attack;
 use serde_json::Value;
-use std::collections::HashMap;
 
 /// 航向
 #[derive(Debug)]
@@ -62,7 +61,7 @@ pub struct War {
     self_formation: Formation,
     enemy_formation: Formation,
     /// 实际攻击
-    attacks: HashMap<String, Vec<Attack>>,
+    attacks_normal: (Vec<Attack>, Vec<Attack>),
 }
 
 impl War {
@@ -115,10 +114,26 @@ impl War {
             self_formation,
             enemy_formation,
 
-            //
-            attacks: HashMap::new(),
+            // 攻击
+            attacks_normal: Self::parse_attacks(report, "normalAttacks")?,
         };
 
         Some(war)
+    }
+
+    fn parse_attacks(vo: &Value, key: &str) -> Option<(Vec<Attack>, Vec<Attack>)> {
+        let mut attacks = (vec![], vec![]);
+        for atk_item in vo.get(key)?.as_array()?.into_iter() {
+            let side = atk_item.get("attackSide")?.as_i64()?;
+            let atk = Attack::from(atk_item)?;
+
+            match side {
+                1 => attacks.0.push(atk),
+                2 => attacks.1.push(atk),
+                _ => panic!("未知攻击 side={}", side),
+            }
+        }
+
+        Some(attacks)
     }
 }
