@@ -62,6 +62,9 @@ pub struct War {
     enemy_formation: Formation,
     /// 实际攻击
     attacks_normal: (Vec<Attack>, Vec<Attack>),
+    attacks_normal2: (Vec<Attack>, Vec<Attack>),
+    attacks_open_missile: (Vec<Attack>, Vec<Attack>),
+    attacks_close_torpedo: (Vec<Attack>, Vec<Attack>),
 }
 
 impl War {
@@ -115,7 +118,10 @@ impl War {
             enemy_formation,
 
             // 攻击
+            attacks_open_missile: Self::parse_attacks(report, "openMissileAttack")?,
             attacks_normal: Self::parse_attacks(report, "normalAttacks")?,
+            attacks_normal2: Self::parse_attacks(report, "normalAttacks2")?,
+            attacks_close_torpedo: Self::parse_attacks(report, "closeTorpedoAttack")?,
         };
 
         Some(war)
