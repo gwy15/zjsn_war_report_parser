@@ -2,10 +2,10 @@ use serde_json::Value;
 
 #[derive(Debug)]
 pub struct Attack {
-    from_index: i32,
-    target_index: i32,
-    damage: i32,
-    is_critical: bool,
+    pub from_index: i32,
+    pub target_index: i32,
+    pub damage: i32,
+    pub is_critical: bool,
 }
 
 impl Attack {

@@ -16,13 +16,17 @@ fn init() {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     init();
 
-    // init writer
-    let mut writer = writer::Writer::new();
-
     // find files
+    let mut wars = vec![];
     for entry in glob("challenge/*.json").expect("Failed to glob files") {
         let path = entry?;
-        utils::parse_and_write(path)?;
+        let war = utils::parse(path)?;
+        wars.push(war);
     }
+
+    // write
+    let mut writer = writer::Writer::new();
+    writer.write(wars);
+
     Ok(())
 }

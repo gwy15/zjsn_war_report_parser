@@ -16,4 +16,5 @@ glob = "0.3.0"
 serde = "1.0.114"
 serde_json = "1.0.56"
 # write
-simple_excel_writer = "0.1.7"
+# simple_excel_writer = "0.1.7"
+simple_excel_writer = { git = "https://github.com/gwy15/simple_excel_writer.git" }

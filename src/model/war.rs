@@ -1,9 +1,10 @@
 use super::attack::Attack;
 use serde_json::Value;
+use simple_excel_writer::sheet::{CellValue, ToCellValue};
 
 /// 航向
 #[derive(Debug)]
-enum Course {
+pub enum Course {
     Same,
     Reverse,
     TNice,
@@ -22,9 +23,21 @@ impl Course {
     }
 }
 
+impl ToCellValue for &Course {
+    fn to_cell_value(&self) -> CellValue {
+        let s = match self {
+            Course::Same => "同航",
+            Course::Reverse => "反航",
+            Course::TNice => "T优",
+            Course::TFuck => "T劣",
+        };
+        CellValue::String(s.to_owned())
+    }
+}
+
 /// 阵型
 #[derive(Debug)]
-enum Formation {
+pub enum Formation {
     DanZong,
     FuZong,
     LunXing,
@@ -45,26 +58,39 @@ impl Formation {
     }
 }
 
+impl ToCellValue for &Formation {
+    fn to_cell_value(&self) -> CellValue {
+        let s = match self {
+            Formation::DanZong => "单纵",
+            Formation::FuZong => "复纵",
+            Formation::LunXing => "轮形",
+            Formation::TXing => "梯形",
+            Formation::DanHeng => "单横",
+        };
+        CellValue::String(s.to_owned())
+    }
+}
+
 #[derive(Debug)]
 pub struct War {
-    file_name: String,
+    pub file_name: String,
 
-    user_name: String,
-    enemy_name: String,
-    fleet_name: String,
-    enemy_fleet_id: i32,
-    enemy_fleet_name: String,
+    pub user_name: String,
+    pub enemy_name: String,
+    pub fleet_name: String,
+    pub enemy_fleet_id: i32,
+    pub enemy_fleet_name: String,
 
     /// 航向
-    course: Course,
+    pub course: Course,
     /// 阵型
-    self_formation: Formation,
-    enemy_formation: Formation,
+    pub self_formation: Formation,
+    pub enemy_formation: Formation,
     /// 实际攻击
-    attacks_normal: (Vec<Attack>, Vec<Attack>),
-    attacks_normal2: (Vec<Attack>, Vec<Attack>),
-    attacks_open_missile: (Vec<Attack>, Vec<Attack>),
-    attacks_close_torpedo: (Vec<Attack>, Vec<Attack>),
+    pub atks_normal: (Vec<Attack>, Vec<Attack>),
+    pub atks_normal2: (Vec<Attack>, Vec<Attack>),
+    pub atks_open_msl: (Vec<Attack>, Vec<Attack>),
+    pub atks_close_tpd: (Vec<Attack>, Vec<Attack>),
 }
 
 impl War {
@@ -118,10 +144,10 @@ impl War {
             enemy_formation,
 
             // 攻击
-            attacks_open_missile: Self::parse_attacks(report, "openMissileAttack")?,
-            attacks_normal: Self::parse_attacks(report, "normalAttacks")?,
-            attacks_normal2: Self::parse_attacks(report, "normalAttacks2")?,
-            attacks_close_torpedo: Self::parse_attacks(report, "closeTorpedoAttack")?,
+            atks_open_msl: Self::parse_attacks(report, "openMissileAttack")?,
+            atks_normal: Self::parse_attacks(report, "normalAttacks")?,
+            atks_normal2: Self::parse_attacks(report, "normalAttacks2")?,
+            atks_close_tpd: Self::parse_attacks(report, "closeTorpedoAttack")?,
         };
 
         Some(war)

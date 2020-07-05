@@ -221,8 +221,7 @@ dependencies = [
 [[package]]
 name = "simple_excel_writer"
 version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b82c3169adf7720aa3cb8af21a2ef75dff29b6ffcb41be81c4975bc31b489290"
+source = "git+https://github.com/gwy15/simple_excel_writer.git#6bcb922e875f3b0d674f48bf3088874610ad66f1"
 dependencies = [
  "zip",
 ]
