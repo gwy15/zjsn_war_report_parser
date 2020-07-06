@@ -74,6 +74,43 @@ impl ToCellValue for &Formation {
     }
 }
 
+/// 制空状态
+#[derive(Debug)]
+pub enum AirType {
+    Dominate,
+    Superiority,
+    Even,
+    Inferior,
+    Lost,
+}
+impl AirType {
+    pub fn from(i: i64) -> AirType {
+        use AirType::*;
+        match i {
+            1 => Dominate,
+            2 => Superiority,
+            3 => Even,
+            4 => Inferior,
+            5 => Lost,
+            _ => panic!("未知制空状态：{}", i),
+        }
+    }
+}
+
+impl ToCellValue for &AirType {
+    fn to_cell_value(&self) -> CellValue {
+        use AirType::*;
+        let s = match self {
+            Dominate => "空确",
+            Superiority => "空优",
+            Even => "空均",
+            Inferior => "空劣",
+            Lost => "空丧",
+        };
+        CellValue::String(s.to_owned())
+    }
+}
+
 #[derive(Debug)]
 pub struct War {
     pub file_name: String,
@@ -87,6 +124,8 @@ pub struct War {
     pub spy_success: bool,
     /// 航向
     pub course: Course,
+    /// 制空
+    pub air_type: AirType,
     /// 阵型
     pub self_formation: Formation,
     pub enemy_formation: Formation,
@@ -118,6 +157,7 @@ impl War {
             .expect("isExploreSuccess 不是数字")
             != 0;
         let course = Course::from(get!("warType")?.as_i64()?);
+        let air_type = AirType::from(get!("airControlType")?.as_i64()?);
 
         let self_fleet = get!("selfFleet")?;
         let fleet_name = self_fleet.get("title")?.as_str()?.to_owned();
@@ -173,6 +213,7 @@ impl War {
             //
             spy_success,
             course,
+            air_type,
             self_formation,
             enemy_formation,
 

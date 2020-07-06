@@ -27,9 +27,27 @@ pub trait WarSheet {
             "敌舰队名",
             "索敌成功",
             "航向",
+            "制空",
             "我方阵型",
             "敌方阵型",
         ];
+    }
+
+    fn row_with_pre_header(war: &War) -> Row {
+        let mut row = Row::new();
+
+        row.add_cell(war.file_name.as_str()); // 文件名
+        row.add_cell(war.user_name.as_str()); // 用户名
+        row.add_cell(war.enemy_name.as_str()); // 敌用户名
+        row.add_cell(war.fleet_name.as_str()); // 舰队
+        row.add_cell(war.enemy_fleet_id as f64); // 敌舰队id
+        row.add_cell(war.enemy_fleet_name.as_str()); // 敌舰队名
+        row.add_cell(war.spy_success); // 索敌
+        row.add_cell(&war.course); // 航向
+        row.add_cell(&war.air_type); // 制空
+        row.add_cell(&war.self_formation); // 我方阵型
+        row.add_cell(&war.enemy_formation); // 敌方阵型
+        row
     }
 }
 
@@ -63,18 +81,7 @@ impl WarSheet for NormalSheet {
     }
 
     fn write_war(war: &War, key: &str, sheet_writer: &mut SheetWriter) -> Result<()> {
-        let mut row = Row::new();
-
-        row.add_cell(war.file_name.as_str()); // 文件名
-        row.add_cell(war.user_name.as_str()); // 用户名
-        row.add_cell(war.enemy_name.as_str()); // 敌用户名
-        row.add_cell(war.fleet_name.as_str()); // 舰队
-        row.add_cell(war.enemy_fleet_id as f64); // 敌舰队id
-        row.add_cell(war.enemy_fleet_name.as_str()); // 敌舰队名
-        row.add_cell(war.spy_success); // 索敌
-        row.add_cell(&war.course); // 航向
-        row.add_cell(&war.self_formation); // 我方阵型
-        row.add_cell(&war.enemy_formation); // 敌方阵型
+        let mut row = Self::row_with_pre_header(war);
 
         for attack in war.attacks[key].iter() {
             row.add_cell(attack.from_index as f64);
@@ -125,18 +132,7 @@ impl WarSheet for AirSheet {
     }
 
     fn write_war(war: &War, key: &str, sheet_writer: &mut SheetWriter) -> Result<()> {
-        let mut row = Row::new();
-
-        row.add_cell(war.file_name.as_str()); // 文件名
-        row.add_cell(war.user_name.as_str()); // 用户名
-        row.add_cell(war.enemy_name.as_str()); // 敌用户名
-        row.add_cell(war.fleet_name.as_str()); // 舰队
-        row.add_cell(war.enemy_fleet_id as f64); // 敌舰队id
-        row.add_cell(war.enemy_fleet_name.as_str()); // 敌舰队名
-        row.add_cell(war.spy_success); // 索敌
-        row.add_cell(&war.course); // 航向
-        row.add_cell(&war.self_formation); // 我方阵型
-        row.add_cell(&war.enemy_formation); // 敌方阵型
+        let mut row = Self::row_with_pre_header(war);
 
         for attack in war.air_attacks[key].iter() {
             row.add_cell(attack.from_index as f64);
