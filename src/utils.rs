@@ -19,3 +19,7 @@ pub fn parse(path: PathBuf) -> Result<War, Box<dyn std::error::Error>> {
     });
     Ok(war)
 }
+
+pub fn format_sheet_name(sheet_name: &str, side: i32) -> String {
+    format!("{}_{}", sheet_name, side)
+}

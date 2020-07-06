@@ -1,6 +1,9 @@
 use super::attack::{AirAttack, Attack, AttackTrait};
 use serde_json::Value;
 use simple_excel_writer::sheet::{CellValue, ToCellValue};
+use std::collections::HashMap;
+
+use crate::utils::format_sheet_name;
 
 /// 航向
 #[derive(Debug)]
@@ -86,13 +89,10 @@ pub struct War {
     /// 阵型
     pub self_formation: Formation,
     pub enemy_formation: Formation,
-    /// 实际攻击
-    pub atks_normal: (Vec<Attack>, Vec<Attack>),
-    pub atks_normal2: (Vec<Attack>, Vec<Attack>),
-    pub atks_open_msl: (Vec<Attack>, Vec<Attack>),
-    pub atks_close_tpd: (Vec<Attack>, Vec<Attack>),
+    /// 一般攻击
+    pub attacks: HashMap<String, Vec<Attack>>,
     /// 航空攻击
-    pub atks_open_air: (Vec<AirAttack>, Vec<AirAttack>),
+    pub air_attacks: HashMap<String, Vec<AirAttack>>,
 }
 
 impl War {
@@ -126,11 +126,33 @@ impl War {
             _ => panic!("傻逼幻萌，enemy fleet id 又瞎几把传"),
         };
 
-        // .as_i64()? as i32;
-
         let enemy_fleet_name = enemy_fleet.get("title")?.as_str()?.to_owned();
         let enemy_formation =
             Formation::from(enemy_fleet.get("formation")?.as_str()?.parse().unwrap());
+
+        // 一般攻击
+        macro_rules! parse_attacks {
+            ($($key:expr => $voKey:expr),*) => {{
+                let mut attacks = HashMap::new();
+                $({
+                    let attacks_tuple = Self::parse_attacks(report, $voKey)?;
+                    attacks.insert(format_sheet_name($key, 1), attacks_tuple.0);
+                    attacks.insert(format_sheet_name($key, 2), attacks_tuple.1);
+                })*
+                attacks
+            }};
+        }
+        let attacks = parse_attacks! {
+            "open_missile" => "openMissileAttack",
+            "normal" => "normalAttacks",
+            "normal2" => "normalAttacks2",
+            "close_torpedo" => "closeTorpedoAttack"
+        };
+
+        // 航空攻击
+        let air_attacks = parse_attacks! {
+            "open_air" => "openAirAttack"
+        };
 
         let war = War {
             file_name,
@@ -146,12 +168,10 @@ impl War {
             enemy_formation,
 
             // 一般攻击
-            atks_open_msl: Self::parse_attacks(report, "openMissileAttack")?,
-            atks_normal: Self::parse_attacks(report, "normalAttacks")?,
-            atks_normal2: Self::parse_attacks(report, "normalAttacks2")?,
-            atks_close_tpd: Self::parse_attacks(report, "closeTorpedoAttack")?,
+            attacks,
+
             // 航空
-            atks_open_air: Self::parse_attacks(report, "openAirAttack")?,
+            air_attacks,
         };
 
         Some(war)
