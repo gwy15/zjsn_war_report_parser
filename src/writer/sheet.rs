@@ -25,6 +25,7 @@ pub trait WarSheet {
             "舰队名",
             "敌舰队id",
             "敌舰队名",
+            "索敌成功",
             "航向",
             "我方阵型",
             "敌方阵型",
@@ -52,7 +53,7 @@ impl WarSheet for NormalSheet {
         for &col in Self::pre_header() {
             row.add_cell(col);
         }
-        const ATK_HEADER: [&str; 4] = ["from", "target", "damage", "critical"];
+        const ATK_HEADER: [&str; 4] = ["from", "target", "伤害", "暴击"];
         for _ in 0..6 {
             for &col in ATK_HEADER.iter() {
                 row.add_cell(col);
@@ -70,6 +71,7 @@ impl WarSheet for NormalSheet {
         row.add_cell(war.fleet_name.as_str()); // 舰队
         row.add_cell(war.enemy_fleet_id as f64); // 敌舰队id
         row.add_cell(war.enemy_fleet_name.as_str()); // 敌舰队名
+        row.add_cell(war.spy_success); // 索敌
         row.add_cell(&war.course); // 航向
         row.add_cell(&war.self_formation); // 我方阵型
         row.add_cell(&war.enemy_formation); // 敌方阵型
@@ -107,8 +109,8 @@ impl WarSheet for AirSheet {
         const ATK_HEADER: [&str; 7] = [
             "from",
             "target",
-            "damage",
-            "critical",
+            "伤害",
+            "暴击",
             //
             "飞机类型",
             "放飞",
@@ -131,6 +133,7 @@ impl WarSheet for AirSheet {
         row.add_cell(war.fleet_name.as_str()); // 舰队
         row.add_cell(war.enemy_fleet_id as f64); // 敌舰队id
         row.add_cell(war.enemy_fleet_name.as_str()); // 敌舰队名
+        row.add_cell(war.spy_success); // 索敌
         row.add_cell(&war.course); // 航向
         row.add_cell(&war.self_formation); // 我方阵型
         row.add_cell(&war.enemy_formation); // 敌方阵型

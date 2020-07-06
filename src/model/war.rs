@@ -83,7 +83,8 @@ pub struct War {
     pub fleet_name: String,
     pub enemy_fleet_id: i32,
     pub enemy_fleet_name: String,
-
+    /// 索敌
+    pub spy_success: bool,
     /// 航向
     pub course: Course,
     /// 阵型
@@ -111,6 +112,11 @@ impl War {
         let user_name = get!("userName")?.as_str()?.to_owned();
         let enemy_name = get!("enemyName")?.as_str()?.to_owned();
 
+        let spy_success = get!("isExploreSuccess")?
+            .as_str()?
+            .parse::<i32>()
+            .expect("isExploreSuccess 不是数字")
+            != 0;
         let course = Course::from(get!("warType")?.as_i64()?);
 
         let self_fleet = get!("selfFleet")?;
@@ -163,6 +169,7 @@ impl War {
             enemy_fleet_id,
             enemy_fleet_name,
             //
+            spy_success,
             course,
             self_formation,
             enemy_formation,
