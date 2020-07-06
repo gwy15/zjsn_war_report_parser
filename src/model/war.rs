@@ -1,4 +1,4 @@
-use super::attack::Attack;
+use super::attack::{AirAttack, Attack, AttackTrait};
 use serde_json::Value;
 use simple_excel_writer::sheet::{CellValue, ToCellValue};
 
@@ -91,6 +91,8 @@ pub struct War {
     pub atks_normal2: (Vec<Attack>, Vec<Attack>),
     pub atks_open_msl: (Vec<Attack>, Vec<Attack>),
     pub atks_close_tpd: (Vec<Attack>, Vec<Attack>),
+    /// 航空攻击
+    pub atks_open_air: (Vec<AirAttack>, Vec<AirAttack>),
 }
 
 impl War {
@@ -143,21 +145,26 @@ impl War {
             self_formation,
             enemy_formation,
 
-            // 攻击
+            // 一般攻击
             atks_open_msl: Self::parse_attacks(report, "openMissileAttack")?,
             atks_normal: Self::parse_attacks(report, "normalAttacks")?,
             atks_normal2: Self::parse_attacks(report, "normalAttacks2")?,
             atks_close_tpd: Self::parse_attacks(report, "closeTorpedoAttack")?,
+            // 航空
+            atks_open_air: Self::parse_attacks(report, "openAirAttack")?,
         };
 
         Some(war)
     }
 
-    fn parse_attacks(vo: &Value, key: &str) -> Option<(Vec<Attack>, Vec<Attack>)> {
+    fn parse_attacks<T>(vo: &Value, key: &str) -> Option<(Vec<T>, Vec<T>)>
+    where
+        T: AttackTrait,
+    {
         let mut attacks = (vec![], vec![]);
         for atk_item in vo.get(key)?.as_array()?.into_iter() {
             let side = atk_item.get("attackSide")?.as_i64()?;
-            let atk = Attack::from(atk_item)?;
+            let atk = T::from(atk_item)?;
 
             match side {
                 1 => attacks.0.push(atk),
