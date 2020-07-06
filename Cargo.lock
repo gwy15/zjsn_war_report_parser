@@ -265,7 +265,7 @@ dependencies = [
 
 [[package]]
 name = "war_report_parser"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "env_logger",
  "glob",

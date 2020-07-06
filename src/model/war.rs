@@ -150,9 +150,11 @@ impl War {
         }
         let attacks = parse_attacks! {
             "open_missile" => "openMissileAttack",
+            "open_torpedo" => "openTorpedoAttack",
             "normal" => "normalAttacks",
             "normal2" => "normalAttacks2",
-            "close_torpedo" => "closeTorpedoAttack"
+            "close_torpedo" => "closeTorpedoAttack",
+            "close_missile" => "closeMissileAttack"
         };
 
         // 航空攻击

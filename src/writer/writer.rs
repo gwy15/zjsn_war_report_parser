@@ -28,15 +28,17 @@ impl Writer {
             }};
         }
 
-        let normal_sheets = make_sheets! (NormalSheet, {
-            "open_missile" => "开幕导弹",
-            "normal" => "炮击",
-            "normal2" => "次轮炮击",
-            "close_torpedo" => "闭幕雷"
-        });
-
         let air_sheets = make_sheets!(AirSheet, {
             "open_air" => "开幕空袭"
+        });
+
+        let normal_sheets = make_sheets! (NormalSheet, {
+            "open_missile" => "开幕导弹",
+            "open_torpedo" => "开幕雷击",
+            "normal" => "炮击",
+            "normal2" => "次轮炮击",
+            "close_torpedo" => "闭幕雷",
+            "close_missile" => "闭幕导弹"
         });
 
         Writer {
@@ -48,20 +50,21 @@ impl Writer {
 
     /// Write a war to all sheets
     pub fn write<'a>(&mut self, wars: Vec<War>) {
-        for (name, sheet) in self.normal_sheets.iter_mut() {
+        // 其他
+        for (key, sheet) in self.normal_sheets.iter_mut() {
             self.wb
                 .write_sheet(sheet.inner(), |sheet_writer| {
-                    NormalSheet::write(&wars, name, sheet_writer)
+                    NormalSheet::write(&wars, key, sheet_writer)
                 })
-                .expect(&format!("写入数据到表 {} 失败", name));
+                .expect(&format!("写入数据到表 {} 失败", key));
         }
         // 空战部分
-        for (name, sheet) in self.air_sheets.iter_mut() {
+        for (key, sheet) in self.air_sheets.iter_mut() {
             self.wb
                 .write_sheet(sheet.inner(), |sheet_writer| {
-                    AirSheet::write(&wars, name, sheet_writer)
+                    AirSheet::write(&wars, key, sheet_writer)
                 })
-                .expect(&format!("写入数据到表 {} 失败", name));
+                .expect(&format!("写入数据到表 {} 失败", key));
         }
     }
 }
