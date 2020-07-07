@@ -6,7 +6,7 @@ edition = "2018"
 build = "src/build.rs"
 
 [package.metadata.winres]
-OriginalFilename = "war_report_parser.EXE"
+OriginalFilename = "化吧打钱.exe"
 LegalCopyright = "Copyright 大头 © 2020"
 
 [target.'cfg(windows)'.build-dependencies]

@@ -1,138 +1,35 @@
 use super::attack::{AirAttack, Attack, AttackTrait};
 use serde_json::Value;
-use simple_excel_writer::sheet::{CellValue, ToCellValue};
+use simple_excel_writer::Row;
+
 use std::collections::HashMap;
 
 use crate::utils::format_sheet_name;
 
-/// 航向
-#[derive(Debug)]
-pub enum Course {
-    Same,
-    Reverse,
-    TNice,
-    TFuck,
-}
-
-impl Course {
-    pub fn from(i: i64) -> Course {
-        match i {
-            1 => Course::Same,
-            2 => Course::Reverse,
-            3 => Course::TNice,
-            4 => Course::TFuck,
-            _ => panic!("航向数字 {} 未知", i),
-        }
-    }
-}
-
-impl ToCellValue for &Course {
-    fn to_cell_value(&self) -> CellValue {
-        let s = match self {
-            Course::Same => "同航",
-            Course::Reverse => "反航",
-            Course::TNice => "T优",
-            Course::TFuck => "T劣",
-        };
-        CellValue::String(s.to_owned())
-    }
-}
-
-/// 阵型
-#[derive(Debug)]
-pub enum Formation {
-    DanZong,
-    FuZong,
-    LunXing,
-    TXing,
-    DanHeng,
-}
-
-impl Formation {
-    pub fn from(i: i64) -> Formation {
-        match i {
-            1 => Formation::DanZong,
-            2 => Formation::FuZong,
-            3 => Formation::LunXing,
-            4 => Formation::TXing,
-            5 => Formation::DanHeng,
-            _ => panic!("阵型数字 {} 未知", i),
-        }
-    }
-}
-
-impl ToCellValue for &Formation {
-    fn to_cell_value(&self) -> CellValue {
-        let s = match self {
-            Formation::DanZong => "单纵",
-            Formation::FuZong => "复纵",
-            Formation::LunXing => "轮形",
-            Formation::TXing => "梯形",
-            Formation::DanHeng => "单横",
-        };
-        CellValue::String(s.to_owned())
-    }
-}
-
-/// 制空状态
-#[derive(Debug)]
-pub enum AirType {
-    Dominate,
-    Superiority,
-    Even,
-    Inferior,
-    Lost,
-}
-impl AirType {
-    pub fn from(i: i64) -> AirType {
-        use AirType::*;
-        match i {
-            1 => Dominate,
-            2 => Superiority,
-            3 => Even,
-            4 => Inferior,
-            5 => Lost,
-            _ => panic!("未知制空状态：{}", i),
-        }
-    }
-}
-
-impl ToCellValue for &AirType {
-    fn to_cell_value(&self) -> CellValue {
-        use AirType::*;
-        let s = match self {
-            Dominate => "空确",
-            Superiority => "空优",
-            Even => "空均",
-            Inferior => "空劣",
-            Lost => "空丧",
-        };
-        CellValue::String(s.to_owned())
-    }
-}
+use super::utils::{AirType, Course, Formation};
 
 #[derive(Debug)]
 pub struct War {
-    pub file_name: String,
+    file_name: String,
 
-    pub user_name: String,
-    pub enemy_name: String,
-    pub fleet_name: String,
-    pub enemy_fleet_id: i32,
-    pub enemy_fleet_name: String,
+    user_name: String,
+    enemy_name: String,
+    fleet_name: String,
+    enemy_fleet_id: i32,
+    enemy_fleet_name: String,
     /// 索敌
-    pub spy_success: bool,
+    spy_success: bool,
     /// 航向
-    pub course: Course,
+    course: Course,
     /// 制空
-    pub air_type: AirType,
+    air_type: AirType,
     /// 阵型
-    pub self_formation: Formation,
-    pub enemy_formation: Formation,
+    self_formation: Formation,
+    enemy_formation: Formation,
     /// 一般攻击
-    pub attacks: HashMap<String, Vec<Attack>>,
+    attacks: HashMap<String, Vec<Attack>>,
     /// 航空攻击
-    pub air_attacks: HashMap<String, Vec<AirAttack>>,
+    air_attacks: HashMap<String, Vec<AirAttack>>,
 }
 
 impl War {
@@ -227,14 +124,15 @@ impl War {
         Some(war)
     }
 
-    fn parse_attacks<T>(vo: &Value, key: &str) -> Option<(Vec<T>, Vec<T>)>
+    /// 从 war report 中解析出一种攻击，返回 (side1, side2)
+    fn parse_attacks<AttackT>(vo: &Value, key: &str) -> Option<(Vec<AttackT>, Vec<AttackT>)>
     where
-        T: AttackTrait,
+        AttackT: AttackTrait,
     {
         let mut attacks = (vec![], vec![]);
         for atk_item in vo.get(key)?.as_array()?.into_iter() {
             let side = atk_item.get("attackSide")?.as_i64()?;
-            let atk = T::from(atk_item)?;
+            let atk = AttackT::from(atk_item)?;
 
             match side {
                 1 => attacks.0.push(atk),
@@ -244,5 +142,104 @@ impl War {
         }
 
         Some(attacks)
+    }
+
+    /// outputs
+
+    fn header_prefix_row() -> Row {
+        const HEADER_PREFIX: &[&str] = &[
+            "文件名",
+            "用户名",
+            "敌用户名",
+            "舰队名",
+            "敌舰队id",
+            "敌舰队名",
+            "索敌成功",
+            "航向",
+            "制空",
+            "我方阵型",
+            "敌方阵型",
+        ];
+        let mut row = Row::new();
+        for &col in HEADER_PREFIX.iter() {
+            row.add_cell(col);
+        }
+        row
+    }
+
+    pub fn header(air: bool) -> Row {
+        let mut row = Self::header_prefix_row();
+        match air {
+            false => {
+                const ATK_HEADER: [&str; 4] = ["from", "target", "伤害", "暴击"];
+                for _ in 0..6 {
+                    for &col in ATK_HEADER.iter() {
+                        row.add_cell(col);
+                    }
+                }
+            }
+            true => {
+                const ATK_HEADER: [&str; 7] = [
+                    "from",
+                    "target",
+                    "伤害",
+                    "暴击",
+                    //
+                    "飞机类型",
+                    "放飞",
+                    "击坠",
+                ];
+                for _ in 0..24 {
+                    for &col in ATK_HEADER.iter() {
+                        row.add_cell(col);
+                    }
+                }
+            }
+        }
+        row
+    }
+
+    fn prefix_row(&self) -> Row {
+        let mut row = Row::new();
+
+        row.add_cell(self.file_name.as_str()); // 文件名
+        row.add_cell(self.user_name.as_str()); // 用户名
+        row.add_cell(self.enemy_name.as_str()); // 敌用户名
+        row.add_cell(self.fleet_name.as_str()); // 舰队
+        row.add_cell(self.enemy_fleet_id as f64); // 敌舰队id
+        row.add_cell(self.enemy_fleet_name.as_str()); // 敌舰队名
+        row.add_cell(self.spy_success); // 索敌
+        row.add_cell(&self.course); // 航向
+        row.add_cell(&self.air_type); // 制空
+        row.add_cell(&self.self_formation); // 我方阵型
+        row.add_cell(&self.enemy_formation); // 敌方阵型
+        row
+    }
+
+    pub fn row(&self, key: &str, air: bool) -> Row {
+        let mut row = self.prefix_row();
+        match air {
+            false => {
+                for attack in self.attacks[key].iter() {
+                    row.add_cell(attack.from_index as f64);
+                    row.add_cell(attack.target_index as f64);
+                    row.add_cell(attack.damage as f64);
+                    row.add_cell(attack.is_critical);
+                }
+            }
+            true => {
+                for attack in self.air_attacks[key].iter() {
+                    row.add_cell(attack.from_index as f64);
+                    row.add_cell(attack.target_index as f64);
+                    row.add_cell(attack.damage as f64);
+                    row.add_cell(attack.is_critical);
+                    //
+                    row.add_cell(attack.plane_type as f64);
+                    row.add_cell(attack.plane_type as f64);
+                    row.add_cell(attack.drop_amount as f64);
+                }
+            }
+        };
+        row
     }
 }

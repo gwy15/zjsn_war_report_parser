@@ -1,9 +1,5 @@
 use serde_json::Value;
 
-pub trait AttackTrait: Sized {
-    fn from(vo: &Value) -> Option<Self>;
-}
-
 fn parse_basic(vo: &Value) -> Option<(i32, i32, i32, bool)> {
     let from_index = vo.get("fromIndex")?.as_i64()? as i32;
     let target_index = vo.get("targetIndex")?.as_array()?[0].as_i64()? as i32;
@@ -14,6 +10,10 @@ fn parse_basic(vo: &Value) -> Option<(i32, i32, i32, bool)> {
     let is_critical = damage_item.get("isCritical")?.as_i64()? != 0;
 
     Some((from_index, target_index, damage, is_critical))
+}
+
+pub trait AttackTrait: Sized {
+    fn from(vo: &Value) -> Option<Self>;
 }
 
 #[derive(Debug)]
