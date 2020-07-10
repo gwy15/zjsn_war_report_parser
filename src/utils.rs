@@ -8,7 +8,7 @@ use serde_json::Value;
 use crate::model::War;
 
 pub fn parse(path: PathBuf) -> Result<War, Box<dyn std::error::Error>> {
-    let file_name = path.to_str().unwrap().to_owned();
+    let file_name = path.file_name().unwrap().to_str().unwrap().to_owned();
     info!("解析文件 {}", path.display());
 
     let reader = File::open(&path)?;
