@@ -12,6 +12,10 @@ LegalCopyright = "Copyright 大头 © 2020"
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"
 
+[lib]
+name = "wrp"
+crate-type = ["cdylib"]
+
 [dependencies]
 # logging
 log = "0.4.7"
