@@ -29,13 +29,19 @@ pub fn file_finder(root: String) -> Result<Vec<PathBuf>, Box<dyn std::error::Err
     let paths = ["challenge", "dealto", "spy"];
     let mut files = vec![];
     for path in paths.iter() {
-        let pattern = format!("{}/{}/*.json", root, path);
-        let msg = format!("Failed to glob files in {}", path);
-        for entry in glob(&pattern).expect(&msg) {
-            let file = entry?;
-            files.push(file);
+        let patterns: Vec<String> = vec![
+            format!("{}/{}/*.json", root, path),
+            format!("{}/{}/*.txt", root, path),
+        ];
+        for pattern in patterns {
+            let msg = format!("Failed to glob files in {}", path);
+            for entry in glob(&pattern).expect(&msg) {
+                let file = entry?;
+                files.push(file);
+            }
         }
     }
+    files.sort_unstable();
     Ok(files)
 }
 
