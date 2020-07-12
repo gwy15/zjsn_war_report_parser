@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use glob::glob;
 use log::info;
 use serde_json::Value;
+use std::io::Read;
 
 use crate::model::War;
 
@@ -11,8 +12,16 @@ pub fn parse(path: PathBuf) -> Result<War, Box<dyn std::error::Error>> {
     let file_name = path.file_name().unwrap().to_str().unwrap().to_owned();
     info!("解析文件 {}", path.display());
 
-    let reader = File::open(&path)?;
-    let data: Value = serde_json::from_reader(reader)?;
+    let mut reader = File::open(&path)?;
+    let mut buf: Vec<u8> = vec![];
+    let bytes = reader.read_to_end(&mut buf)?;
+    log::debug!("文件 {:?} 读取 {} bytes", path, bytes);
+    if buf.starts_with(&[0xef, 0xbb, 0xbf]) {
+        log::debug!("检测到 utf-8 with BOM 编码");
+        buf = Vec::from(&buf[3..]);
+    }
+
+    let data: Value = serde_json::from_slice(&buf)?;
 
     let war = War::from(&data, file_name).unwrap_or_else(|| {
         log::error!("文件解析错误：{}", path.display());
