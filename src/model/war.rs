@@ -88,6 +88,7 @@ impl War {
         let attacks = parse_attacks! {
             "open_missile" => "openMissileAttack",
             "open_torpedo" => "openTorpedoAttack",
+            "open_antisub" => "openAntiSubAttack",
             "normal" => "normalAttacks",
             "normal2" => "normalAttacks2",
             "close_torpedo" => "closeTorpedoAttack",

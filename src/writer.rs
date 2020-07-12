@@ -36,6 +36,7 @@ impl Writer {
         let normal_sheets = make_sheets! {
             "open_missile" => "开幕导弹",
             "open_torpedo" => "开幕雷击",
+            "open_antisub" => "开幕反潜",
             "normal" => "炮击",
             "normal2" => "次轮炮击",
             "close_torpedo" => "闭幕雷",
