@@ -1,6 +1,6 @@
 [package]
 name = "war_report_parser"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["gwy15 <gwy15thu@gmail.com>"]
 edition = "2018"
 build = "src/build.rs"
@@ -12,9 +12,9 @@ LegalCopyright = "Copyright 大头 © 2020"
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"
 
-[lib]
-name = "wrp"
-crate-type = ["cdylib"]
+# [lib]
+# name = "wrp"
+# crate-type = ["cdylib"]
 
 [dependencies]
 # logging

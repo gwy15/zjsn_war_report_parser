@@ -236,7 +236,7 @@ impl War {
                     row.add_cell(attack.is_critical);
                     //
                     row.add_cell(attack.plane_type as f64);
-                    row.add_cell(attack.plane_type as f64);
+                    row.add_cell(attack.plane_amount as f64);
                     row.add_cell(attack.drop_amount as f64);
                 }
             }
