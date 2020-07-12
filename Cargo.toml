@@ -1,6 +1,6 @@
 [package]
 name = "war_report_parser"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["gwy15 <gwy15thu@gmail.com>"]
 edition = "2018"
 build = "src/build.rs"
