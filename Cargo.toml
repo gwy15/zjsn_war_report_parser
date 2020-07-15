@@ -6,8 +6,8 @@ edition = "2018"
 build = "src/build.rs"
 
 [package.metadata.winres]
-OriginalFilename = "化吧打钱.exe"
-LegalCopyright = "Copyright 大头 © 2020"
+OriginalFilename = "给我打钱.exe"
+LegalCopyright = "Copyright gwy15 © 2020"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"
@@ -28,3 +28,5 @@ serde_json = "1.0.56"
 # write
 # simple_excel_writer = "0.1.7"
 simple_excel_writer = { git = "https://github.com/gwy15/simple_excel_writer.git" }
+# utils
+# lazy_static = "1.4.0"

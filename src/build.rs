@@ -1,11 +1,12 @@
 #[cfg(windows)]
-extern crate winres;
+use winres;
 
 #[cfg(windows)]
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut res = winres::WindowsResource::new();
     res.set_icon("resource/icon.ico");
-    res.compile().unwrap();
+    res.compile()?;
+    Ok(())
 }
 
 #[cfg(not(windows))]
