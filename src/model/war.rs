@@ -47,6 +47,7 @@ impl War {
 
         let user_name = get!("userName")?.as_str()?.to_owned();
         let enemy_name = get!("enemyName")?.as_str()?.to_owned();
+        log::debug!("解析用户名完成");
 
         let spy_success = get!("isExploreSuccess")?
             .as_str()?
@@ -72,6 +73,7 @@ impl War {
         let enemy_fleet_name = enemy_fleet.get("title")?.as_str()?.to_owned();
         let enemy_formation =
             Formation::from(enemy_fleet.get("formation")?.as_str()?.parse().unwrap());
+        log::debug!("基本信息解析完毕");
 
         // 一般攻击
         macro_rules! parse_attacks {
@@ -94,11 +96,13 @@ impl War {
             "close_torpedo" => "closeTorpedoAttack",
             "close_missile" => "closeMissileAttack"
         };
+        log::debug!("正常战斗解析完毕");
 
         // 航空攻击
         let air_attacks = parse_attacks! {
             "open_air" => "openAirAttack"
         };
+        log::debug!("航空攻击解析完毕");
 
         let war = War {
             file_name,
