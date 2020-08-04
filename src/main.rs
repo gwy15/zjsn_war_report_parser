@@ -14,10 +14,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     utils::parse_directory(".".to_string())?;
 
     // wait for key
-    let mut _buf = String::new();
     println!("回车打钱");
     std::io::stdin()
-        .read_line(&mut _buf)
+        .read_line(&mut String::new())
         .expect("读取 stdin 错误");
 
     Ok(())
