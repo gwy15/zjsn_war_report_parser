@@ -1,13 +1,14 @@
-use super::attack::{AirAttack, Attack, AttackTrait};
+use std::collections::HashMap;
+use std::path::PathBuf;
+
 use serde_json::Value;
 use simple_excel_writer::Row;
 
-use std::collections::HashMap;
-
-use crate::utils::format_sheet_name;
-
+use super::attack::{AirAttack, Attack, AttackTrait};
 use super::hpinfo::HpInfo;
+use super::utils::read_vo;
 use super::utils::{AirType, Course, Formation};
+use crate::utils::format_sheet_name;
 
 pub enum WriteType {
     NormalBattle,
@@ -17,7 +18,7 @@ pub enum WriteType {
 
 #[derive(Debug)]
 pub struct War {
-    file_name: String,
+    name: String,
 
     user_name: String,
     enemy_name: String,
@@ -42,13 +43,30 @@ pub struct War {
 }
 
 impl War {
-    pub fn from(vo: &Value, file_name: String) -> Option<War> {
+    pub fn from(
+        name: String,
+        file: PathBuf,
+        _night_file: Option<PathBuf>,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        // TODO: 解析夜战
+        log::info!("解析文件 {}", name);
+
+        let day_vo = read_vo(file);
+
+        let war = War::from_vo(&day_vo, name.clone()).unwrap_or_else(|| {
+            log::error!("文件解析错误：{}", name);
+            panic!("文件解析错误：{}", name);
+        });
+        Ok(war)
+    }
+
+    fn from_vo(vo: &Value, name: String) -> Option<War> {
         let report = vo.get("warReport")?;
 
         macro_rules! get {
             ($key:expr) => {
                 report.get($key).or_else(|| {
-                    log::error!("文件 {} warReport 缺少 key {}", file_name, $key);
+                    log::error!("文件 {} warReport 缺少 key {}", name, $key);
                     None
                 })
             };
@@ -122,7 +140,7 @@ impl War {
         };
 
         let war = War {
-            file_name,
+            name,
             // 战斗相关
             user_name,
             enemy_name,
@@ -234,7 +252,7 @@ impl War {
     fn prefix_row(&self) -> Row {
         let mut row = Row::new();
 
-        row.add_cell(self.file_name.as_str()); // 文件名
+        row.add_cell(self.name.as_str()); // 文件名
         row.add_cell(self.user_name.as_str()); // 用户名
         row.add_cell(self.enemy_name.as_str()); // 敌用户名
         row.add_cell(self.fleet_name.as_str()); // 舰队

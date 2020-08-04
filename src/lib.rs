@@ -21,6 +21,7 @@ pub extern "C" fn convert_directory(ptr: *const c_char) -> c_int {
 #[no_mangle]
 pub extern "C" fn count_directory(ptr: *const c_char) -> c_int {
     let path = unsafe { ptr_to_string(ptr) };
-    let files = utils::file_finder(path).expect("Unknown error happened while counting files");
+    let files =
+        utils::ParseTarget::from_path(path).expect("Unknown error happened while counting files");
     files.len() as c_int
 }

@@ -106,3 +106,20 @@ impl ToCellValue for &AirType {
         CellValue::String(s.to_owned())
     }
 }
+
+/// 文件读取
+pub fn read_vo(path: std::path::PathBuf) -> serde_json::Value {
+    use std::fs::File;
+    use std::io::Read;
+    let mut reader = File::open(&path).expect("打开文件错误");
+    let mut buf: Vec<u8> = vec![];
+    let bytes = reader.read_to_end(&mut buf).expect("读取文件错误");
+    log::debug!("文件 {:?} 读取 {} bytes", path, bytes);
+    if buf.starts_with(&[0xef, 0xbb, 0xbf]) {
+        log::debug!("检测到 utf-8 with BOM 编码");
+        buf = Vec::from(&buf[3..]);
+    }
+
+    let data: serde_json::Value = serde_json::from_slice(&buf).expect("Json 格式错误");
+    data
+}
