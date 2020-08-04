@@ -28,6 +28,7 @@ impl ParseTarget {
             .join(&format!("{}_night.{}", name, ext));
 
         let night_file = if night_file.exists() {
+            log::debug!("找到夜战文件");
             Some(night_file)
         } else {
             None

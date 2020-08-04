@@ -100,7 +100,7 @@ impl War {
         let enemy_fleet_name = enemy_fleet.get("title")?.as_str()?.to_owned();
         let enemy_formation =
             Formation::from(enemy_fleet.get("formation")?.as_str()?.parse().unwrap());
-        log::debug!("基本信息解析完毕");
+        log::debug!("基本信息解析完成");
 
         // 一般攻击
         macro_rules! parse_attacks {
@@ -123,13 +123,13 @@ impl War {
             "close_torpedo" => "closeTorpedoAttack",
             "close_missile" => "closeMissileAttack"
         };
-        log::debug!("正常战斗解析完毕");
+        log::debug!("正常战斗解析完成");
 
         // 航空攻击
         let air_attacks = parse_attacks! {
             "open_air" => "openAirAttack"
         };
-        log::debug!("航空攻击解析完毕");
+        log::debug!("航空攻击解析完成");
 
         let hp_infos = {
             let (side1, side2) = HpInfo::parse(&vo["warReport"]);
