@@ -1,4 +1,4 @@
-use crate::model::War;
+use crate::model::{War, WriteType};
 use crate::utils::format_sheet_name;
 use simple_excel_writer::{Sheet, Workbook};
 use std::collections::HashMap;
@@ -7,6 +7,7 @@ pub struct Writer {
     wb: Workbook,
     normal_sheets: HashMap<String, Sheet>,
     air_sheets: HashMap<String, Sheet>,
+    hp_sheets: HashMap<String, Sheet>,
 }
 
 impl Writer {
@@ -43,23 +44,27 @@ impl Writer {
             "close_missile" => "闭幕导弹"
         };
 
+        let hp_sheets = make_sheets! {
+            "hp" => "hp"
+        };
+
         Writer {
             wb,
             normal_sheets,
             air_sheets,
+            hp_sheets,
         }
     }
 
     /// Write a war to all sheets
     pub fn write<'a>(&mut self, wars: Vec<War>) {
-        // 其他
-
+        // 正常部分
         for (key, sheet) in self.normal_sheets.iter_mut() {
             self.wb
                 .write_sheet(sheet, |sheet_writer| {
-                    sheet_writer.append_row(War::header(false))?;
+                    sheet_writer.append_row(War::header(WriteType::NormalBattle))?;
                     for war in wars.iter() {
-                        sheet_writer.append_row(war.row(key, false))?;
+                        sheet_writer.append_row(war.row(key, WriteType::NormalBattle))?;
                     }
                     Ok(())
                 })
@@ -69,13 +74,25 @@ impl Writer {
         for (key, sheet) in self.air_sheets.iter_mut() {
             self.wb
                 .write_sheet(sheet, |sheet_writer| {
-                    sheet_writer.append_row(War::header(true))?;
+                    sheet_writer.append_row(War::header(WriteType::AirBattle))?;
                     for war in wars.iter() {
-                        sheet_writer.append_row(war.row(key, true))?;
+                        sheet_writer.append_row(war.row(key, WriteType::AirBattle))?;
                     }
                     Ok(())
                 })
                 .expect(&format!("写入数据到表 {} 失败", key));
+        }
+        // 血量部分
+        for (key, sheet) in self.hp_sheets.iter_mut() {
+            self.wb
+                .write_sheet(sheet, |sheet_writer| {
+                    sheet_writer.append_row(War::header(WriteType::HpInfo))?;
+                    for war in wars.iter() {
+                        sheet_writer.append_row(war.row(key, WriteType::HpInfo))?;
+                    }
+                    Ok(())
+                })
+                .expect(&format!("写入血量表 {} 失败", key));
         }
     }
 }

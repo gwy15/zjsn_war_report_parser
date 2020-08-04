@@ -6,7 +6,14 @@ use std::collections::HashMap;
 
 use crate::utils::format_sheet_name;
 
+use super::hpinfo::HpInfo;
 use super::utils::{AirType, Course, Formation};
+
+pub enum WriteType {
+    NormalBattle,
+    AirBattle,
+    HpInfo,
+}
 
 #[derive(Debug)]
 pub struct War {
@@ -30,6 +37,8 @@ pub struct War {
     attacks: HashMap<String, Vec<Attack>>,
     /// 航空攻击
     air_attacks: HashMap<String, Vec<AirAttack>>,
+    /// 血量信息
+    hp_infos: HashMap<String, HpInfo>,
 }
 
 impl War {
@@ -104,6 +113,14 @@ impl War {
         };
         log::debug!("航空攻击解析完毕");
 
+        let hp_infos = {
+            let (side1, side2) = HpInfo::parse(&vo["warReport"]);
+            let mut m = HashMap::new();
+            m.insert(format_sheet_name("hp", 1), side1);
+            m.insert(format_sheet_name("hp", 2), side2);
+            m
+        };
+
         let war = War {
             file_name,
             // 战斗相关
@@ -124,6 +141,9 @@ impl War {
 
             // 航空
             air_attacks,
+
+            //
+            hp_infos,
         };
 
         Some(war)
@@ -172,10 +192,10 @@ impl War {
         row
     }
 
-    pub fn header(air: bool) -> Row {
+    pub fn header(write_type: WriteType) -> Row {
         let mut row = Self::header_prefix_row();
-        match air {
-            false => {
+        match write_type {
+            WriteType::NormalBattle => {
                 const ATK_HEADER: [&str; 4] = ["from", "target", "伤害", "暴击"];
                 for _ in 0..6 {
                     for &col in ATK_HEADER.iter() {
@@ -183,7 +203,7 @@ impl War {
                     }
                 }
             }
-            true => {
+            WriteType::AirBattle => {
                 const ATK_HEADER: [&str; 7] = [
                     "from",
                     "target",
@@ -197,6 +217,13 @@ impl War {
                 for _ in 0..24 {
                     for &col in ATK_HEADER.iter() {
                         row.add_cell(col);
+                    }
+                }
+            }
+            WriteType::HpInfo => {
+                for prefix in &["满", "入", "出"] {
+                    for idx in 1..=6 {
+                        row.add_cell(format!("{}{}", prefix, idx));
                     }
                 }
             }
@@ -221,10 +248,10 @@ impl War {
         row
     }
 
-    pub fn row(&self, key: &str, air: bool) -> Row {
+    pub fn row(&self, key: &str, write_type: WriteType) -> Row {
         let mut row = self.prefix_row();
-        match air {
-            false => {
+        match write_type {
+            WriteType::NormalBattle => {
                 for attack in self.attacks[key].iter() {
                     row.add_cell(attack.from_index as f64);
                     row.add_cell(attack.target_index as f64);
@@ -232,7 +259,7 @@ impl War {
                     row.add_cell(attack.is_critical);
                 }
             }
-            true => {
+            WriteType::AirBattle => {
                 for attack in self.air_attacks[key].iter() {
                     row.add_cell(attack.from_index as f64);
                     row.add_cell(attack.target_index as f64);
@@ -242,6 +269,18 @@ impl War {
                     row.add_cell(attack.plane_type as f64);
                     row.add_cell(attack.plane_amount as f64);
                     row.add_cell(attack.drop_amount as f64);
+                }
+            }
+            WriteType::HpInfo => {
+                let hp_info = &self.hp_infos[key];
+                for v in [&hp_info.max, &hp_info.start, &hp_info.end].iter() {
+                    for i in 0..6 {
+                        if i < v.len() {
+                            row.add_cell(v[i] as f64);
+                        } else {
+                            row.add_empty_cells(1);
+                        }
+                    }
                 }
             }
         };
